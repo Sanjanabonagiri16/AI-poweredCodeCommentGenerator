@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Code Comment Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>AI-Powered Code Comment Generator</h1>
+    <textarea id="code" rows="10" cols="80" placeholder="Enter your code here"></textarea>
+    <br>
+    <select id="language">
+        <option value="python">Python</option>
+        <option value="javascript">JavaScript</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+    </select>
+    <select id="comment_style">
+        <option value="google">Google</option>
+        <option value="numpy">NumPy</option>
+        <option value="single-line">Single-line</option>
+    </select>
+    <select id="detail_level">
+        <option value="brief">Brief</option>
+        <option value="moderate">Moderate</option>
+        <option value="detailed">Detailed</option>
+    </select>
+    <input type="file" id="custom_style_guide" accept=".json">
+    <button onclick="generateComments()">Generate Comments</button>
+    <br>
+    <textarea id="result" rows="10" cols="80" readonly></textarea>
+
+    <script>
+        async function generateComments() {
+            const code = document.getElementById('code').value;
+            const language = document.getElementById('language').value;
+            const commentStyle = document.getElementById('comment_style').value;
+            const detailLevel = document.getElementById('detail_level').value;
+            const customStyleGuideFile = document.getElementById('custom_style_guide').files[0];
+
+            let customStyleGuide = null;
+            if (customStyleGuideFile) {
+                customStyleGuide = await readFileContent(customStyleGuideFile);
+            }
+
+            axios.post('/generate_comments', {
+                code: code,
+                language: language,
+                comment_style: commentStyle,
+                detail_level: detailLevel,
+                custom_style_guide: customStyleGuide
+            })
+            .then(function (response) {
+                document.getElementById('result').value = response.data.commented_code;
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+            });
+        }
+
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => resolve(event.target.result);
+                reader.onerror = (error) => reject(error);
+                reader.readAsText(file);
+            });
+        }
+    </script>
+</body>
+</html>
